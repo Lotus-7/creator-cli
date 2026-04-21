@@ -1,0 +1,8 @@
+# User data and outputs
+.creator/
+
+# Dependencies
+node_modules/
+
+# OS
+.DS_Store

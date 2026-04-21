@@ -1,0 +1,16 @@
+{
+  "name": "creator-cli",
+  "version": "0.1.0",
+  "description": "A workflow-first CLI for content creators.",
+  "type": "module",
+  "bin": {
+    "creator": "./src/cli.js"
+  },
+  "scripts": {
+    "start": "node ./src/cli.js",
+    "check": "node --check ./src/cli.js"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
