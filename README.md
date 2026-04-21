@@ -1,85 +1,186 @@
 # creator-cli
 
-A workflow-first CLI for content creators. The first version focuses on a simple content pipeline:
+一个面向内容创作者的命令行工具，围绕实际工作流程设计，帮助你用 AI 保持个人风格、提高内容生产效率。
 
-1. `topic`
-2. `outline`
-3. `draft`
-4. `title`
+## 核心特点
 
-This version also adds:
+**工作流驱动**：命令按照创作者的实际工作流程设计，从选题、大纲、初稿到标题形成完整的内容生产管线。
 
-- multi-provider model routing
-- `profile`
-- `library`
-- `repurpose`
-- `calendar`
-- `voice`
+**声音风格系统**：可以从你的历史文本样本中学习写作风格，生成新内容时自动应用这种风格，确保输出「像你写的」。
 
-It also includes an interactive `chat` mode and local content storage under `.creator/`.
+**多模型支持**：支持 OpenAI、Kimi、Anthropic、GLM、Gemini、OpenRouter、Qwen 等多个 AI 提供商。
 
-## Quick start
+**本地优先**：所有生成内容存储在本地 `.creator/` 目录，你的配置、风格档案、内容资产完全可控。
+
+## 安装
 
 ```bash
-cd /Users/lotus-7/creator-cli
-node ./src/cli.js help
-node ./src/cli.js topic "为什么普通人做自媒体总是断更" --platform xiaohongshu --tone direct
-node ./src/cli.js outline "为什么普通人做自媒体总是断更"
-node ./src/cli.js draft "为什么普通人做自媒体总是断更"
-node ./src/cli.js title "为什么普通人做自媒体总是断更"
-node ./src/cli.js profile show
-node ./src/cli.js profile set aiProvider openrouter
-node ./src/cli.js profile provider openrouter --enable --model openai/gpt-4.1-mini
-node ./src/cli.js providers list
-node ./src/cli.js providers use qwen
-node ./src/cli.js providers test
-node ./src/cli.js voice init xiaoqi
-node ./src/cli.js voice train xiaoqi ./samples
-node ./src/cli.js voice use xiaoqi
-node ./src/cli.js voice edit xiaoqi identity 内容创业者
-node ./src/cli.js voice audit xiaoqi draft.md
-node ./src/cli.js voice improve xiaoqi draft.md
-node ./src/cli.js draft "为什么普通人做自媒体总是断更" --voice xiaoqi
-node ./src/cli.js library add pillar 选题拆解
-node ./src/cli.js repurpose ./.creator/outputs/example.md --to douyin
-node ./src/cli.js calendar "个人成长内容矩阵" --days 7
-node ./src/cli.js chat
+# 克隆仓库
+git clone https://github.com/Lotus-7/creator-cli.git
+cd creator-cli
+
+# 确保已安装 Node.js 20+
+node --version
 ```
 
-## Design
-
-- Workflow first: commands map to creator outcomes, not model primitives.
-- Local first: outputs are written to `.creator/outputs/`.
-- Context aware: profile and defaults live in `.creator/profile.json`.
-- LLM ready: current generation supports local fallback plus remote providers.
-- Voice aware: creator voices live in `.creator/voices/` and can be trained from sample texts.
-
-## Provider support
-
-The CLI can route generation through:
-
-- OpenAI `Responses API`
-- Kimi via OpenAI-compatible `chat/completions`
-- Anthropic `Messages API`
-- GLM via OpenAI-compatible `chat/completions`
-- Google Gemini `models.generateContent`
-- OpenRouter `chat/completions`
-- Qwen via OpenAI-compatible `chat/completions`
-- Local fallback provider
-
-Provider settings are stored in `.creator/providers.json`.
-
-Typical setup:
+## 快速开始
 
 ```bash
+# 初始化配置
 node ./src/cli.js init
+
+# 设置 AI 提供商（以 OpenRouter 为例）
 node ./src/cli.js profile set aiProvider openrouter
 node ./src/cli.js profile provider openrouter --enable --model openai/gpt-4.1-mini
-export OPENROUTER_API_KEY=...
+export OPENROUTER_API_KEY=你的密钥
+
+# 测试连接
+node ./src/cli.js providers test
+
+# 开始创作
+node ./src/cli.js topic "为什么普通人做自媒体总是断更" --platform xiaohongshu
 ```
 
-Supported environment variables:
+## 内容生产流程
 
+### 1. 选题 - topic
+
+从模糊想法生成结构化选题卡片，包含受众分析、切入角度、开头钩子、系列延伸等。
+
+```bash
+node ./src/cli.js topic "为什么普通人做自媒体总是断更" --platform xiaohongshu --tone direct
+```
+
+选项：
+- `--platform` 目标平台（小红书、抖音、公众号等）
+- `--niche` 内容领域
+- `--tone` 语气风格
+- `--audience` 目标受众
+
+### 2. 大纲 - outline
+
+基于选题生成内容大纲。
+
+```bash
+node ./src/cli.js outline "为什么普通人做自媒体总是断更"
+```
+
+### 3. 初稿 - draft
+
+生成 markdown 格式的完整初稿。
+
+```bash
+node ./src/cli.js draft "为什么普通人做自媒体总是断更" --voice xiaoqi
+```
+
+选项：
+- `--voice` 应用声音风格
+
+### 4. 标题 - title
+
+生成多个标题选项供选择。
+
+```bash
+node ./src/cli.js title "为什么普通人做自媒体总是断更"
+```
+
+## 声音风格系统
+
+这是本工具的核心功能。声音风格是从你的历史文本中学习到的写作特征，生成新内容时会自动应用。
+
+### 创建和训练风格
+
+```bash
+# 初始化一个声音风格
+node ./src/cli.js voice init xiaoqi
+
+# 从样本文本中学习风格
+node ./src/cli.js voice train xiaoqi ./samples
+
+# 查看风格档案
+node ./src/cli.js voice show xiaoqi
+
+# 设为默认风格
+node ./src/cli.js voice use xiaoqi
+```
+
+### 编辑风格字段
+
+```bash
+# 编辑身份定位
+node ./src/cli.js voice edit xiaoqi identity 内容创业者
+
+# 编辑核心理念
+node ./src/cli.js voice edit xiaoqi coreBeliefs 少空话,先行动,先验证
+
+# 编辑禁用表达
+node ./src/cli.js voice edit xiaoqi bannedPhrases "总的来说,基本上,实际上"
+```
+
+可编辑的字段：
+- `description` 描述
+- `identity` 身份定位
+- `audience` 目标受众
+- `coreBeliefs` 核心理念
+- `bannedPhrases` 禁用表达
+- `signaturePhrases` 标志性表达
+- `structurePatterns` 结构习惯
+- `styleFingerprint.tone` 语气
+- `styleFingerprint.sentenceStyle` 句式风格
+- `styleFingerprint.openingStyle` 开头风格
+- `styleFingerprint.closingStyle` 结尾风格
+- `styleFingerprint.rhythm` 节奏
+- `styleFingerprint.emotionalTemperature` 情绪温度
+
+### 风格审核和改进
+
+```bash
+# 审核文稿与风格的匹配度
+node ./src/cli.js voice audit xiaoqi ./draft.md
+
+# 自动改进文稿以更贴近风格
+node ./src/cli.js voice improve xiaoqi ./draft.md
+```
+
+## 配置管理
+
+### 查看和修改配置
+
+```bash
+# 查看当前配置
+node ./src/cli.js profile show
+
+# 设置默认平台
+node ./src/cli.js profile set defaultPlatform 抖音
+
+# 设置默认风格
+node ./src/cli.js profile set defaultVoice xiaoqi
+```
+
+### AI 提供商管理
+
+```bash
+# 列出所有提供商
+node ./src/cli.js providers list
+
+# 切换默认提供商
+node ./src/cli.js providers use qwen
+
+# 测试提供商连接
+node ./src/cli.js providers test
+node ./src/cli.js providers test openrouter
+```
+
+支持的提供商：
+- OpenAI
+- Kimi（月之暗面）
+- Anthropic
+- GLM（智谱）
+- Google Gemini
+- OpenRouter
+- Qwen（通义千问）
+
+对应的环境变量：
 - `OPENAI_API_KEY`
 - `MOONSHOT_API_KEY`
 - `ANTHROPIC_API_KEY`
@@ -88,169 +189,74 @@ Supported environment variables:
 - `OPENROUTER_API_KEY`
 - `DASHSCOPE_API_KEY`
 
-## Commands
+## 其他功能
 
-### `creator init`
+### 内容资产库 - library
 
-Creates `.creator/` with starter profile and content library files.
-
-### `creator topic <idea>`
-
-Generates a topic card with audience, angle, hook, and series ideas.
-
-Options:
-
-- `--platform <name>`
-- `--niche <name>`
-- `--tone <name>`
-- `--audience <name>`
-- `--provider <name>`
-- `--model <id>`
-
-### `creator outline <idea>`
-
-Generates a content outline.
-
-Options:
-
-- `--provider <name>`
-- `--model <id>`
-
-### `creator draft <idea>`
-
-Generates a first draft in markdown.
-
-Options:
-
-- `--provider <name>`
-- `--model <id>`
-- `--voice <name>`
-
-### `creator title <idea>`
-
-Generates several title options and title formulas.
-
-Options:
-
-- `--provider <name>`
-- `--model <id>`
-- `--voice <name>`
-
-### `creator profile`
-
-Shows or updates creator defaults and provider settings.
-
-Examples:
+管理你的内容资产，如核心选题、系列内容等。
 
 ```bash
-node ./src/cli.js profile show
-node ./src/cli.js profile set defaultPlatform 抖音
-node ./src/cli.js profile set aiProvider gemini
-node ./src/cli.js profile provider gemini --enable --model gemini-2.5-flash
-node ./src/cli.js profile set defaultVoice xiaoqi
-```
-
-### `creator library`
-
-Manages local content assets.
-
-Examples:
-
-```bash
+# 列出所有资产
 node ./src/cli.js library list
-node ./src/cli.js library add pillar 认知升级
+
+# 添加核心选题
+node ./src/cli.js library add pillar 选题拆解
+
+# 添加系列
 node ./src/cli.js library add series 7天内容挑战
+
+# 移除资产
 node ./src/cli.js library remove banned 自媒体秘籍
 ```
 
-### `creator providers test [name]`
+### 内容改写 - repurpose
 
-Checks provider configuration and, by default, attempts a live minimal request when the provider is enabled and the API key environment variable is present.
-
-Examples:
+将现有内容改写为适合其他平台的版本。
 
 ```bash
-node ./src/cli.js providers test
-node ./src/cli.js providers test openrouter
-node ./src/cli.js providers test qwen --no-live
+node ./src/cli.js repurpose ./.creator/outputs/example.md --to douyin --voice xiaoqi
 ```
 
-### `creator providers list`
+### 发布日历 - calendar
 
-Shows all configured providers and marks the current default provider with `*`.
-
-### `creator providers use <name>`
-
-Switches the default provider and syncs the profile model to that provider's default model.
-
-### `creator voice`
-
-Stores and trains a personal style profile.
-
-Examples:
+基于主题生成未来几天的发布计划。
 
 ```bash
-node ./src/cli.js voice init xiaoqi
-node ./src/cli.js voice train xiaoqi ./samples
-node ./src/cli.js voice show xiaoqi
-node ./src/cli.js voice use xiaoqi
-node ./src/cli.js voice edit xiaoqi coreBeliefs 少空话,先行动,先验证
-node ./src/cli.js voice audit xiaoqi ./draft.md
-node ./src/cli.js voice improve xiaoqi ./draft.md
-node ./src/cli.js draft "今天想聊执行力" --voice xiaoqi
+node ./src/cli.js calendar "个人成长内容矩阵" --days 7 --platform xiaohongshu
 ```
 
-Editable voice fields:
+### 交互模式 - chat
 
-- `description`
-- `identity`
-- `audience`
-- `notes`
-- `coreBeliefs`
-- `bannedPhrases`
-- `signaturePhrases`
-- `structurePatterns`
-- `styleFingerprint.tone`
-- `styleFingerprint.sentenceStyle`
-- `styleFingerprint.openingStyle`
-- `styleFingerprint.closingStyle`
-- `styleFingerprint.rhythm`
-- `styleFingerprint.emotionalTemperature`
+进入简单的交互式对话环境。
 
-### `creator repurpose <source>`
+```bash
+node ./src/cli.js chat
+```
 
-Rewrites an existing draft for another platform.
+## 文件存储结构
 
-Options:
+所有生成的文件存储在 `.creator/` 目录：
 
-- `--to <platform>`
-- `--provider <name>`
-- `--model <id>`
-- `--voice <name>`
+```
+.creator/
+├── profile.json          # 配置文件
+├── library.json          # 内容资产
+├── providers.json        # AI 提供商配置
+├── voices/               # 声音风格档案
+│   └── xiaoqi.json
+└── outputs/              # 生成的内容
+    ├── topic-xxx.json
+    ├── draft-xxx.md
+    └── ...
+```
 
-### `creator calendar <theme>`
+## 设计理念
 
-Generates a publishing calendar.
+- **工作流优先**：命令对应创作者的实际产出目标，而非模型的 API 原语
+- **本地优先**：所有输出写入本地文件，你拥有完整的数据控制权
+- **上下文感知**：配置和默认值存储在 profile 中，减少重复输入
+- **风格感知**：创作者的声音风格可以训练、审核和复用
 
-Options:
+## License
 
-- `--days <count>`
-- `--platform <name>`
-- `--provider <name>`
-- `--model <id>`
-- `--voice <name>`
-
-### `creator chat`
-
-Starts a simple interactive workflow shell.
-
-## Storage
-
-Generated files go to:
-
-- `.creator/profile.json`
-- `.creator/library.json`
-- `.creator/providers.json`
-- `.creator/voices/*.json`
-- `.creator/outputs/*.md`
-- `.creator/outputs/*.json`
+MIT
