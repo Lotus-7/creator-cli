@@ -38,7 +38,7 @@ Usage:
   creator providers use <name>
   creator providers test [name] [--model <id>] [--no-live]
   creator voice list
-  creator voice init <name>
+    creator voice create <name>    # 交互式创建风格
   creator voice show [name]
   creator voice use <name>
   creator voice train <name> <path>
@@ -166,8 +166,14 @@ export function formatOutline(data) {
   console.log();
 
   data.sections.forEach((section, index) => {
-    const num = colorize("cyan", `${String(index + 1)}.`);
-    console.log(`  ${num} ${section}`);
+    // 检测内容是否已以数字编号开头，避免重复编号
+    const hasNumbering = /^\d+\.\s/.test(section);
+    if (hasNumbering) {
+      console.log(`  ${section}`);
+    } else {
+      const num = colorize("cyan", `${String(index + 1)}.`);
+      console.log(`  ${num} ${section}`);
+    }
   });
 
   console.log();

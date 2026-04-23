@@ -57,15 +57,73 @@ export async function runVoice(positionals, options) {
     return;
   }
 
-  if (subcommand === "init") {
+  if (subcommand === "init" || subcommand === "create") {
     if (!name) {
       throw new Error("voice init requires a name");
     }
-    const template = createVoiceTemplate(name);
-    const filePath = await ensureVoice(name, template);
-    printSuccess(`Voice initialized: ${filePath}`);
+    await runVoiceInitInteractive(name);
     return;
   }
+
+// 交互式创建 voice
+async function runVoiceInitInteractive(name) {
+  const readline = (await import("node:readline/promises")).default;
+  const { stdin: input, stdout: output } = process;
+  const rl = readline.createInterface({ input, output });
+
+  const voice = createVoiceTemplate(name);
+  voice.name = name;
+
+  console.log(`\n创建声音风格: ${name}`);
+  console.log("按 Enter 跳过可选字段\n");
+
+  const questions = [
+    { key: "description", label: "描述", required: false, example: "比如：小红书风格，活泼亲切" },
+    { key: "identity", label: "身份定位", required: false, example: "比如：内容创业者、产品经理" },
+    { key: "audience", label: "目标受众", required: false, example: "比如：职场新人、自媒体创作者" },
+    { key: "coreBeliefs", label: "核心理念", required: false, isArray: true, example: "用逗号分隔，如：少空话,先行动" },
+    { key: "bannedPhrases", label: "禁用表达", required: false, isArray: true, example: "用逗号分隔，如：总的来说,基本上" },
+    { key: "signaturePhrases", label: "标志性表达", required: false, isArray: true, example: "用逗号分隔，如：你好呀,我们来" },
+  ];
+
+  for (const q of questions) {
+    const hint = q.example ? ` (${q.example})` : "";
+    const answer = await rl.question(`${q.label}${hint}: `);
+
+    if (answer.trim()) {
+      if (q.isArray) {
+        voice[q.key] = answer.split(/,|，/).map(s => s.trim()).filter(Boolean);
+      } else {
+        voice[q.key] = answer.trim();
+      }
+    }
+  }
+
+  console.log("\n风格特征（可选）");
+  const styleQuestions = [
+    { key: "tone", label: "语气", example: "比如：轻松、严肃、直接" },
+    { key: "sentenceStyle", label: "句式风格", example: "比如：短句为主、长句解释" },
+    { key: "openingStyle", label: "开头风格", example: "比如：喜欢用提问开头" },
+    { key: "closingStyle", label: "结尾风格", example: "比如：总结+行动号召" },
+    { key: "rhythm", label: "节奏", example: "比如：快节奏、娓娓道来" },
+    { key: "emotionalTemperature", label: "情绪温度", example: "比如：偏热、偏稳" },
+  ];
+
+  for (const q of styleQuestions) {
+    const hint = q.example ? ` (${q.example})` : "";
+    const answer = await rl.question(`${q.label}${hint}: `);
+    if (answer.trim()) {
+      voice.styleFingerprint[q.key] = answer.trim();
+    }
+  }
+
+  rl.close();
+
+  const filePath = await ensureVoice(name, voice);
+  console.log(`\n✔ Voice 已创建: ${filePath}`);
+  console.log(`\n提示: 使用 "creator voice use ${name}" 设为默认`);
+  console.log(`      使用 "creator voice train ${name} <samples>" 从样本文本中学习风格\n`);
+}
 
   if (subcommand === "show") {
     const target = getVoiceTarget(name, context);

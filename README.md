@@ -99,8 +99,8 @@ creator title "为什么普通人做自媒体总是断更"
 ### 创建和训练风格
 
 ```bash
-# 初始化一个声音风格
-creator voice init xiaoqi
+# 交互式创建声音风格（推荐）
+creator voice create xiaoqi
 
 # 从样本文本中学习风格
 creator voice train xiaoqi ./samples
