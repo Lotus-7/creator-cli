@@ -83,6 +83,13 @@ const DEFAULT_PROVIDERS = {
       baseUrl: "https://dashscope.aliyuncs.com/compatible-mode/v1",
       apiKeyEnv: "DASHSCOPE_API_KEY",
       model: "qwen-plus"
+    },
+    deepseek: {
+      type: "openai_compatible",
+      enabled: false,
+      baseUrl: "https://api.deepseek.com",
+      apiKeyEnv: "DEEPSEEK_API_KEY",
+      model: "deepseek-chat"
     }
   }
 };
