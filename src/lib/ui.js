@@ -47,7 +47,7 @@ Usage:
   creator voice improve [name] <file-or-text>
   creator repurpose <source> [--to <platform>] [--provider <name>] [--model <id>] [--voice <name>]
   creator calendar <theme> [--days <count>] [--platform <name>] [--provider <name>] [--model <id>] [--voice <name>]
-  creator chat
+  creator chat              # 交互式对话 (/topic /outline /draft /title /ask)
   creator help
 `);
 }
